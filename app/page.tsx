@@ -1,70 +1,107 @@
+const competition = {
+  name: "Proude Cup",
+  course: "Lowes Park White",
+  date: "25 July 2026",
+  status: "OPEN",
+  leaderboardRelease: "16:00",
+};
+
 export default function Home() {
   return (
-    <main className="min-h-screen bg-green-100 flex justify-center py-10 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl overflow-hidden">
+    <main className="min-h-screen bg-green-100 flex justify-center px-4 py-8">
 
-        <div className="bg-green-700 text-white p-6">
-          <h1 className="text-3xl font-bold">🏌️ Fairway Live</h1>
-          <p className="mt-2 opacity-90">
-            Wednesday Stableford
-          </p>
-          <p className="opacity-80">
-            Royal Lytham
-          </p>
-        </div>
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
 
-        <div className="p-6">
+        <header className="bg-green-700 text-white p-6">
+          <h1 className="text-3xl font-bold">
+            ⛳ Lowes Park Fivers
+          </h1>
+
+          <p className="mt-3 text-lg">
+            {competition.name}
+          </p>
+
+          <p>
+            📍 {competition.course}
+          </p>
+
+          <p>
+            📅 {competition.date}
+          </p>
+        </header>
+
+
+        <section className="p-6">
 
           <div className="mb-6">
-            <p className="text-sm text-gray-500">Competition Status</p>
-            <p className="text-green-700 font-bold text-lg">
-              🟢 OPEN
-            </p>
-          </div>
-
-          <div className="mb-6 rounded-xl border border-yellow-300 bg-yellow-50 p-4">
-            <h2 className="font-semibold">
-              Leaderboard
+            <h2 className="font-semibold text-lg">
+              Competition Status
             </h2>
 
-            <p className="mt-2">
-              🔒 Hidden until 4:00 pm
+            <p className="text-green-700 font-bold mt-2">
+              🟢 {competition.status}
             </p>
           </div>
 
-          <div className="space-y-5">
 
-            <label className="flex items-center justify-between">
-              <span>Playing</span>
+          <div className="border rounded-xl p-4 mb-6">
+
+            <h2 className="font-semibold text-lg mb-4">
+              Your Entry
+            </h2>
+
+
+            <label className="flex justify-between mb-4">
+              <span>Playing?</span>
               <input type="checkbox" defaultChecked />
             </label>
 
-            <label className="flex items-center justify-between">
-              <span>Paid</span>
+
+            <label className="flex justify-between">
+              <span>Entry fee paid?</span>
               <input type="checkbox" />
             </label>
 
-            <div>
-              <label className="block mb-2">
-                Net Score
-              </label>
+          </div>
 
-              <input
-                type="number"
-                className="w-full rounded-lg border p-3"
-                placeholder="Enter score"
-              />
-            </div>
 
-            <button className="w-full rounded-lg bg-green-700 text-white py-3 font-semibold hover:bg-green-800">
-              Submit Score
-            </button>
+          <div className="mb-6">
+
+            <label className="font-semibold">
+              Net Score
+            </label>
+
+            <input
+              type="number"
+              placeholder="Enter your score"
+              className="w-full mt-2 border rounded-lg p-3"
+            />
 
           </div>
 
-        </div>
+
+          <button className="w-full bg-green-700 text-white rounded-lg py-3 font-semibold">
+            Submit Score
+          </button>
+
+
+          <div className="mt-8 bg-yellow-50 border border-yellow-300 rounded-xl p-4">
+
+            <h2 className="font-semibold">
+              🏆 Leaderboard
+            </h2>
+
+            <p className="mt-2">
+              🔒 Hidden until {competition.leaderboardRelease}
+            </p>
+
+          </div>
+
+
+        </section>
 
       </div>
+
     </main>
   );
 }
