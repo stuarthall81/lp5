@@ -12,8 +12,8 @@ export default function Home() {
 
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
 
-        <header className="bg-green-700 text-white p-6">
-          <h1 className="text-3xl font-bold">
+        <header className="text-3xl font-bold text-center bg-red-600 text-white p-4">
+          <h1 className="text-3xl font-bold text-center bg-red-600 text-white p-4">        
             ⛳ Lowes Park Fivers
           </h1>
 

@@ -1,3 +1,4 @@
+import "./globals.css";
 import BottomNavigation from "@/components/BottomNavigation";
 
 export default function RootLayout({
