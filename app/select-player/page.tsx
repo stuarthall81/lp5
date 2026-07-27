@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const players = [
   "John Smith",
@@ -10,6 +10,14 @@ const players = [
 
 export default function SelectPlayer() {
   const [selectedPlayer, setSelectedPlayer] = useState("");
+
+useEffect(() => {
+  const savedPlayer = localStorage.getItem("lowesParkPlayer");
+
+  if (savedPlayer) {
+    setSelectedPlayer(savedPlayer);
+  }
+}, []);
 
   return (
     <main className="min-h-screen bg-green-100 flex justify-center px-4 py-8">
@@ -35,8 +43,8 @@ export default function SelectPlayer() {
               key={player}
               type="button"
               onClick={() => {
-  console.log("Clicked:", player);
   setSelectedPlayer(player);
+  localStorage.setItem("lowesParkPlayer", player);
 }}
               className={
   selectedPlayer === player
