@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 const competition = {
   name: "Proude Cup",
   course: "Lowes Park White",
@@ -7,7 +10,18 @@ const competition = {
 };
 
 export default function Home() {
+
+  const [player, setPlayer] = useState("");
+
+  useEffect(() => {
+    const savedPlayer = localStorage.getItem("lowesParkPlayer");
+
+    if (savedPlayer) {
+      setPlayer(savedPlayer);
+    }
+  }, []);
   return (
+
     <main className="min-h-screen bg-green-100 flex justify-center px-4 py-8">
 
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const players = [
   "John Smith",
@@ -9,24 +10,30 @@ const players = [
 ];
 
 export default function SelectPlayer() {
+  const router = useRouter();
+
   const [selectedPlayer, setSelectedPlayer] = useState("");
 
-useEffect(() => {
-  const savedPlayer = localStorage.getItem("lowesParkPlayer");
+  useEffect(() => {
+    const savedPlayer = localStorage.getItem("lowesParkPlayer");
 
-  if (savedPlayer) {
-    setSelectedPlayer(savedPlayer);
+    if (savedPlayer) {
+      setSelectedPlayer(savedPlayer);
+    }
+  }, []);
+
+  function choosePlayer(player: string) {
+    setSelectedPlayer(player);
+    localStorage.setItem("lowesParkPlayer", player);
   }
-}, []);
 
   return (
     <main className="min-h-screen bg-green-100 flex justify-center px-4 py-8">
-
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
 
-        <h1 className="text-3xl font-bold text-center bg-red-600 text-white p-4">
-          ⛳ Lowes Park Fivers
-        </h1>
+        <h1 className="text-3xl font-bold text-center">
+  ⛳ Lowes Park Fivers
+</h1>
 
         <p className="text-center mt-4 mb-6">
           Who are you?
@@ -37,29 +44,26 @@ useEffect(() => {
         </p>
 
         <div className="space-y-4">
-
           {players.map((player) => (
             <button
               key={player}
               type="button"
-              onClick={() => {
-  setSelectedPlayer(player);
-  localStorage.setItem("lowesParkPlayer", player);
-}}
+              onClick={() => choosePlayer(player)}
               className={
-  selectedPlayer === player
-    ? "w-full rounded-xl border p-4 text-lg bg-green-700 text-white border-green-700"
-    : "w-full rounded-xl border p-4 text-lg bg-white text-black"
+                selectedPlayer === player
+                  ? "w-full rounded-xl border p-4 text-lg bg-green-700 text-white border-green-700"
+                  : "w-full rounded-xl border p-4 text-lg bg-white text-black"
               }
             >
               {player}
             </button>
           ))}
-
         </div>
 
         <button
           type="button"
+          disabled={!selectedPlayer}
+          onClick={() => router.push("/")}
           className={`w-full mt-8 rounded-xl py-3 font-semibold text-white ${
             selectedPlayer
               ? "bg-green-700"
@@ -70,7 +74,6 @@ useEffect(() => {
         </button>
 
       </div>
-
     </main>
   );
 }
