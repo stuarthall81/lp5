@@ -26,10 +26,15 @@ export default function Home() {
 
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
 
-        <header className="text-3xl font-bold text-center bg-red-600 text-white p-4">
-          <h1 className="text-3xl font-bold text-center bg-red-600 text-white p-4">        
+        <header className="text-3xl font-bold text-center">
+          <h1 className="text-3xl font-bold text-center">        
             ⛳ Lowes Park Fivers
           </h1>
+          <p className="text-center mt-4 text-lg">
+  {player
+    ? `Welcome back, ${player}`
+    : "Please select your player"}
+</p>
 
           <p className="mt-3 text-lg">
             {competition.name}
