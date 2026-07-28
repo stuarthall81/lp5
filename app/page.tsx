@@ -32,7 +32,7 @@ export default function Home() {
           </h1>
           <p className="text-center mt-4 text-lg">
   {player
-    ? `Welcome back, ${player}`
+     ? `Welcome back, ${player.split(" ")[0]} 👋`
     : "Please select your player"}
 </p>
 

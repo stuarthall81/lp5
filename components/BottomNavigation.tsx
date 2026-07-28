@@ -27,6 +27,11 @@ export default function BottomNavigation() {
           Profile
         </Link>
 
+        <Link href="/admin" className="flex flex-col items-center text-sm">
+  <span className="text-xl">⚙️</span>
+  Admin
+</Link>
+
       </div>
     </nav>
   );
