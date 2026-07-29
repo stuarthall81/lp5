@@ -3,11 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const players = [
-  "John Smith",
-  "Dave Jones",
-  "Chris Taylor",
-];
+import { players } from "@/data/players";
 
 export default function SelectPlayer() {
   const router = useRouter();
