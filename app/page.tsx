@@ -1,4 +1,7 @@
 "use client";
+import { useRouter } from "next/navigation";
+import PrizeFundCard from "@/components/PrizeFundCard";
+
 
 import { useEffect, useState } from "react";
 const competition = {
@@ -12,6 +15,7 @@ const competition = {
 export default function Home() {
 
   const [player, setPlayer] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     const savedPlayer = localStorage.getItem("lowesParkPlayer");
@@ -62,6 +66,10 @@ export default function Home() {
             </p>
           </div>
 
+          <PrizeFundCard
+  entries={18}
+  entryFee={5}
+/>
 
           <div className="border rounded-xl p-4 mb-6">
 
@@ -99,9 +107,11 @@ export default function Home() {
           </div>
 
 
-          <button className="w-full bg-green-700 text-white rounded-lg py-3 font-semibold">
-            Submit Score
-          </button>
+          <button
+  className="w-full bg-green-700 text-white rounded-lg py-3 font-semibold"
+>
+  Open Competition
+</button>
 
 
           <div className="mt-8 bg-yellow-50 border border-yellow-300 rounded-xl p-4">
