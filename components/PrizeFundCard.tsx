@@ -1,15 +1,14 @@
+import { Competition } from "@/types/competition";
+import { calculatePrizeFund } from "@/lib/prizeFund";
+
 type PrizeFundCardProps = {
-  entries: number;
-  entryFee: number;
-  rollover?: number;
+  competition: Competition;
 };
 
 export default function PrizeFundCard({
-  entries,
-  entryFee,
-  rollover = 0,
+  competition,
 }: PrizeFundCardProps) {
-  const prizeFund = entries * entryFee + rollover;
+  const prizeFund = calculatePrizeFund(competition);
 
   return (
     <div className="bg-green-50 border border-green-300 rounded-xl p-4 mb-6">
@@ -22,18 +21,18 @@ export default function PrizeFundCard({
 
         <div className="flex justify-between">
           <span>Current Entries</span>
-          <span>{entries}</span>
+          <span>{competition.entries}</span>
         </div>
 
         <div className="flex justify-between">
           <span>Entry Fee</span>
-          <span>£{entryFee}</span>
+          <span>£{competition.entryFee}</span>
         </div>
 
-        {rollover > 0 && (
+        {competition.rollover > 0 && (
           <div className="flex justify-between">
             <span>Carry Forward</span>
-            <span>£{rollover}</span>
+            <span>£{competition.rollover}</span>
           </div>
         )}
 

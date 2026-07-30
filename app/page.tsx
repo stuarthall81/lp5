@@ -1,21 +1,15 @@
 "use client";
 import { useRouter } from "next/navigation";
 import PrizeFundCard from "@/components/PrizeFundCard";
-
+import { competitions } from "@/data/competitions";
 
 import { useEffect, useState } from "react";
-const competition = {
-  name: "Proude Cup",
-  course: "Lowes Park White",
-  date: "25 July 2026",
-  status: "OPEN",
-  leaderboardRelease: "16:00",
-};
 
 export default function Home() {
 
   const [player, setPlayer] = useState("");
   const router = useRouter();
+  const competition = competitions[0];
 
   useEffect(() => {
     const savedPlayer = localStorage.getItem("lowesParkPlayer");
@@ -62,14 +56,12 @@ export default function Home() {
             </h2>
 
             <p className="text-green-700 font-bold mt-2">
-              🟢 {competition.status}
+              🟢 Open for Entries
             </p>
           </div>
 
-          <PrizeFundCard
-  entries={18}
-  entryFee={5}
-/>
+         <PrizeFundCard
+  PrizeFundCard competition={competition} />
 
           <div className="border rounded-xl p-4 mb-6">
 
@@ -121,7 +113,7 @@ export default function Home() {
             </h2>
 
             <p className="mt-2">
-              🔒 Hidden until {competition.leaderboardRelease}
+              🔒 Leaderboard goes live at 16:00
             </p>
 
           </div>
