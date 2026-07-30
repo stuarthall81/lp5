@@ -1,5 +1,7 @@
-import { Competition } from "@/types/competition";
-
-export function calculatePrizeFund(competition: Competition) {
-  return competition.entries * competition.entryFee + competition.rollover;
+export function calculatePrizeFund(
+  currentEntries: number,
+  entryFee: number,
+  rollover: number
+) {
+  return currentEntries * entryFee + rollover;
 }

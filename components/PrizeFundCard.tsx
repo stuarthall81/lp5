@@ -1,5 +1,6 @@
 import { Competition } from "@/types/competition";
 import { calculatePrizeFund } from "@/lib/prizeFund";
+import { playerEntries } from "@/data/playerEntries";
 
 type PrizeFundCardProps = {
   competition: Competition;
@@ -8,20 +9,30 @@ type PrizeFundCardProps = {
 export default function PrizeFundCard({
   competition,
 }: PrizeFundCardProps) {
-  const prizeFund = calculatePrizeFund(competition);
+  const competitionEntries = playerEntries.filter(
+    (entry) => entry.competitionId === competition.id
+  );
+
+  const currentEntries = competitionEntries.filter(
+    (entry) => entry.playing
+  ).length;
+
+  const prizeFund = calculatePrizeFund(
+    currentEntries,
+    competition.entryFee,
+    competition.rollover
+  );
 
   return (
     <div className="bg-green-50 border border-green-300 rounded-xl p-4 mb-6">
-
       <h2 className="font-semibold text-lg">
         💰 Prize Fund
       </h2>
 
       <div className="mt-3 space-y-2">
-
         <div className="flex justify-between">
           <span>Current Entries</span>
-          <span>{competition.entries}</span>
+          <span>{currentEntries}</span>
         </div>
 
         <div className="flex justify-between">
@@ -40,9 +51,7 @@ export default function PrizeFundCard({
           <span>Winner's Prize</span>
           <span>£{prizeFund}</span>
         </div>
-
       </div>
-
     </div>
   );
 }
