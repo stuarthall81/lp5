@@ -1,6 +1,6 @@
 import { competitions } from "@/data/competitions";
 import { playerEntries } from "@/data/playerEntries";
-
+import CurrentPlayerEntry from "@/components/CurrentPlayerEntry";
 import PrizeFundCard from "@/components/PrizeFundCard";
 import PlayerEntryCard from "@/components/PlayerEntryCard";
 
@@ -24,13 +24,7 @@ export default async function CompetitionPage({
   }
 
   // Temporary until authentication is added
-  const currentPlayer = "John Smith";
-
-  const playerEntry = playerEntries.find(
-    (entry) =>
-      entry.playerId === currentPlayer &&
-      entry.competitionId === competition.id
-  );
+  
 
   return (
     <main className="min-h-screen bg-green-100 flex justify-center px-4 py-8">
@@ -50,13 +44,9 @@ export default async function CompetitionPage({
 
         <PrizeFundCard competition={competition} />
 
-        {playerEntry && (
-          <PlayerEntryCard
-            playing={playerEntry.playing}
-            paid={playerEntry.paid}
-            score={playerEntry.score}
-          />
-        )}
+        <CurrentPlayerEntry
+  competitionId={competition.id}
+/>
 
       </div>
     </main>

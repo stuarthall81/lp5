@@ -5,9 +5,9 @@ export const playerEntries: PlayerEntry[] = [
   {
     competitionId: "2026-proude-cup",
     playerId: "John Smith",
-    playing: true,
-    paid: true,
-    score: 67,
+    playing: false,
+    paid: false,
+    
   },
 
   {

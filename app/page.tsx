@@ -1,15 +1,14 @@
 "use client";
-import { useRouter } from "next/navigation";
 import PrizeFundCard from "@/components/PrizeFundCard";
 import { competitions } from "@/data/competitions";
+import Link from "next/link";
 
 import { useEffect, useState } from "react";
 
 export default function Home() {
 
   const [player, setPlayer] = useState("");
-  const router = useRouter();
-  const competition = competitions[0];
+    const competition = competitions[0];
 
   useEffect(() => {
     const savedPlayer = localStorage.getItem("lowesParkPlayer");
@@ -60,50 +59,16 @@ export default function Home() {
             </p>
           </div>
 
-         <PrizeFundCard
-  PrizeFundCard competition={competition} />
+         <PrizeFundCard competition={competition} />
 
-          <div className="border rounded-xl p-4 mb-6">
-
-            <h2 className="font-semibold text-lg mb-4">
-              Your Entry
-            </h2>
-
-
-            <label className="flex justify-between mb-4">
-              <span>Playing?</span>
-              <input type="checkbox" defaultChecked />
-            </label>
-
-
-            <label className="flex justify-between">
-              <span>Entry fee paid?</span>
-              <input type="checkbox" />
-            </label>
-
-          </div>
-
-
-          <div className="mb-6">
-
-            <label className="font-semibold">
-              Net Score
-            </label>
-
-            <input
-              type="number"
-              placeholder="Enter your score"
-              className="w-full mt-2 border rounded-lg p-3"
-            />
-
-          </div>
-
-
-          <button
-  className="w-full bg-green-700 text-white rounded-lg py-3 font-semibold"
+          
+                  
+          <Link
+  href={`/competition/${competition.id}`}
+  className="block w-full bg-green-700 text-white rounded-lg py-3 text-center font-semibold"
 >
   Open Competition
-</button>
+</Link>
 
 
           <div className="mt-8 bg-yellow-50 border border-yellow-300 rounded-xl p-4">

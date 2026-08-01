@@ -1,52 +1,152 @@
 "use client";
 
+import { useState } from "react";
+import {
+  updatePlayerEntry,
+  submitScore as saveScore,
+} from "@/lib/playerEntries";
+
 type PlayerEntryCardProps = {
+  competitionId: string;
+  playerId: string;
+  playerName: string;
   playing: boolean;
   paid: boolean;
   score?: number;
 };
 
 export default function PlayerEntryCard({
+  competitionId,
+  playerId,
+  playerName,
   playing,
   paid,
   score,
 }: PlayerEntryCardProps) {
+  const [isPlaying, setIsPlaying] = useState(playing);
+  const [hasPaid, setHasPaid] = useState(paid);
+  const [netScore, setNetScore] = useState(score?.toString() ?? "");
+  const [entered, setEntered] = useState(playing);
+  const [message, setMessage] = useState("");
+
+  const firstName = playerName.split(" ")[0];
+  const heading = firstName.endsWith("s")
+    ? `${firstName}' Entry`
+    : `${firstName}'s Entry`;
+
+  function enterCompetition() {
+    updatePlayerEntry(
+      competitionId,
+      playerId,
+      {
+        playing: isPlaying,
+        paid: hasPaid,
+      }
+    );
+
+    setEntered(true);
+    setMessage("Competition entry saved");
+
+    setTimeout(() => {
+      setMessage("");
+    }, 2500);
+  }
+
+  function submitPlayerScore() {
+    saveScore(
+      competitionId,
+      playerId,
+      Number(netScore)
+    );
+
+    setMessage("Score submitted");
+
+    setTimeout(() => {
+      setMessage("");
+    }, 2500);
+  }
+
   return (
-    <div className="border rounded-xl p-4 space-y-4">
+    <div className="border rounded-xl p-4 space-y-5">
 
       <h2 className="font-semibold text-lg">
-        Your Entry
+        {heading}
       </h2>
 
-      <label className="flex justify-between">
-        <span>I'm Playing</span>
-        <input
-          type="checkbox"
-          checked={playing}
-          readOnly
-        />
-      </label>
+      {!entered ? (
+        <>
+          <label className="flex justify-between">
+            <span>I'm Playing</span>
 
-      <label className="flex justify-between">
-        <span>Entry Fee Paid</span>
-        <input
-          type="checkbox"
-          checked={paid}
-          readOnly
-        />
-      </label>
+            <input
+              type="checkbox"
+              checked={isPlaying}
+              onChange={(e) =>
+                setIsPlaying(e.target.checked)
+              }
+            />
+          </label>
 
-      <div>
-        <label className="block mb-2">
-          Net Score
-        </label>
+          <label className="flex justify-between">
+            <span>I've Paid</span>
 
-        <input
-          className="w-full border rounded-lg p-3"
-          value={score ?? ""}
-          readOnly
-        />
-      </div>
+            <input
+              type="checkbox"
+              checked={hasPaid}
+              onChange={(e) =>
+                setHasPaid(e.target.checked)
+              }
+            />
+          </label>
+
+          <button
+            onClick={enterCompetition}
+            className="w-full bg-green-700 text-white rounded-lg py-3 font-semibold"
+          >
+            Enter Competition
+          </button>
+        </>
+      ) : (
+        <>
+          <div className="bg-green-50 border border-green-300 rounded-lg p-3">
+            ✅ You're entered
+          </div>
+
+          {!hasPaid && (
+            <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 text-sm">
+              ⚠ Please remember to pay your entry fee before the competition closes.
+            </div>
+          )}
+
+          <div>
+            <label className="block mb-2 font-medium">
+              Today's Net Score
+            </label>
+
+            <input
+              type="number"
+              value={netScore}
+              onChange={(e) =>
+                setNetScore(e.target.value)
+              }
+              className="w-full border rounded-lg p-3"
+            />
+          </div>
+
+          <button
+            onClick={submitPlayerScore}
+            className="w-full bg-blue-700 text-white rounded-lg py-3 font-semibold"
+          >
+            Submit Score
+          </button>
+        </>
+      )}
+
+      {message && (
+        <div className="bg-green-100 border border-green-300 rounded-lg p-3 text-center text-green-800">
+          ✓ {message}
+        </div>
+      )}
 
     </div>
   );
