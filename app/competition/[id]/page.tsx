@@ -4,6 +4,7 @@ import CurrentPlayerEntry from "@/components/CurrentPlayerEntry";
 import PrizeFundCard from "@/components/PrizeFundCard";
 import PlayerEntryCard from "@/components/PlayerEntryCard";
 import LeaderboardCard from "@/components/LeaderboardCard";
+import { getEntries } from "@/lib/entries";
 
 type CompetitionPageProps = {
   params: Promise<{
@@ -23,6 +24,10 @@ export default async function CompetitionPage({
   if (!competition) {
     return <p>Competition not found.</p>;
   }
+
+   const entries = await getEntries(competition.id);
+
+console.log("Supabase entries:", entries);
 
   
   return (
