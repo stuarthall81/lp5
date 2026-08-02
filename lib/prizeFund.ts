@@ -5,4 +5,3 @@ export function calculatePrizeFund(
 ) {
   return currentEntries * entryFee + rollover;
 }
-
