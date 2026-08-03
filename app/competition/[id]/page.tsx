@@ -1,9 +1,7 @@
 import { competitions } from "@/data/competitions";
-import { playerEntries } from "@/data/playerEntries";
-import CurrentPlayerEntry from "@/components/CurrentPlayerEntry";
 import PrizeFundCard from "@/components/PrizeFundCard";
-import PlayerEntryCard from "@/components/PlayerEntryCard";
 import LeaderboardCard from "@/components/LeaderboardCard";
+import CurrentPlayerEntry from "@/components/CurrentPlayerEntry";
 import { getEntries } from "@/lib/entries";
 
 type CompetitionPageProps = {
@@ -25,11 +23,16 @@ export default async function CompetitionPage({
     return <p>Competition not found.</p>;
   }
 
-   const entries = await getEntries(competition.id);
+  const entries = await getEntries(competition.id);
 
-console.log("Supabase entries:", entries);
+  // Temporary until authentication is added
+  const currentPlayer = "John Smith";
 
-  
+  const playerEntry =
+    entries.find(
+      (entry) => entry.player_id === currentPlayer
+    ) ?? null;
+
   return (
     <main className="min-h-screen bg-green-100 flex justify-center px-4 py-8">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
@@ -49,12 +52,14 @@ console.log("Supabase entries:", entries);
         <PrizeFundCard competition={competition} />
 
         <CurrentPlayerEntry
-  competitionId={competition.id}
-/>
+          competitionId={competition.id}
+          playerName={currentPlayer}
+          entry={playerEntry}
+        />
 
         <LeaderboardCard
-  competitionId={competition.id}
-/>
+          competitionId={competition.id}
+        />
 
       </div>
     </main>

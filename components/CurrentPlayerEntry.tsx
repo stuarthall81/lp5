@@ -1,45 +1,41 @@
 "use client";
 
-import { getCurrentPlayer } from "@/lib/player";
-import { playerEntries } from "@/data/playerEntries";
 import PlayerEntryCard from "./PlayerEntryCard";
-import { useEffect, useState } from "react";
+
+type Entry = {
+  player_id: string;
+  playing: boolean;
+  paid: boolean;
+  score: number | null;
+};
 
 type Props = {
   competitionId: string;
+  playerName: string;
+  entry: Entry | null;
 };
 
 export default function CurrentPlayerEntry({
   competitionId,
+  playerName,
+  entry,
 }: Props) {
-  const [player, setPlayer] = useState("");
-
-  useEffect(() => {
-    const current = getCurrentPlayer();
-
-    if (current) {
-      setPlayer(current);
-    }
-  }, []);
-
-  if (!player) return null;
-
-  const entry = playerEntries.find(
-    (e) =>
-      e.playerId === player &&
-      e.competitionId === competitionId
-  );
-
-  if (!entry) return null;
+  if (!entry) {
+    return (
+      <p className="text-gray-600">
+        You haven't entered this competition yet.
+      </p>
+    );
+  }
 
   return (
     <PlayerEntryCard
       competitionId={competitionId}
-      playerId={player}
-      playerName={player}
+      playerId={playerName}
+      playerName={playerName}
       playing={entry.playing}
       paid={entry.paid}
-      score={entry.score}
+      score={entry.score ?? undefined}
     />
   );
 }

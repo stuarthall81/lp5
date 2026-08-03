@@ -3,8 +3,8 @@
 import { useState } from "react";
 import {
   updatePlayerEntry,
-  submitScore as saveScore,
-} from "@/lib/playerEntries";
+  submitScore,
+} from "@/lib/entries";
 
 type PlayerEntryCardProps = {
   competitionId: string;
@@ -23,19 +23,21 @@ export default function PlayerEntryCard({
   paid,
   score,
 }: PlayerEntryCardProps) {
-  const [isPlaying, setIsPlaying] = useState(playing);
-  const [hasPaid, setHasPaid] = useState(paid);
-  const [netScore, setNetScore] = useState(score?.toString() ?? "");
-  const [entered, setEntered] = useState(playing);
-  const [message, setMessage] = useState("");
-
   const firstName = playerName.split(" ")[0];
   const heading = firstName.endsWith("s")
     ? `${firstName}' Entry`
     : `${firstName}'s Entry`;
 
-  function enterCompetition() {
-    updatePlayerEntry(
+  const [isPlaying, setIsPlaying] = useState(playing);
+  const [hasPaid, setHasPaid] = useState(paid);
+  const [netScore, setNetScore] = useState(
+    score?.toString() ?? ""
+  );
+  const [entered, setEntered] = useState(playing);
+  const [message, setMessage] = useState("");
+
+  async function enterCompetition() {
+    await updatePlayerEntry(
       competitionId,
       playerId,
       {
@@ -45,15 +47,14 @@ export default function PlayerEntryCard({
     );
 
     setEntered(true);
+
     setMessage("Competition entry saved");
 
-    setTimeout(() => {
-      setMessage("");
-    }, 2500);
+    window.location.reload();
   }
 
-  function submitPlayerScore() {
-    saveScore(
+  async function submitPlayerScore() {
+    await submitScore(
       competitionId,
       playerId,
       Number(netScore)
@@ -61,9 +62,7 @@ export default function PlayerEntryCard({
 
     setMessage("Score submitted");
 
-    setTimeout(() => {
-      setMessage("");
-    }, 2500);
+    window.location.reload();
   }
 
   return (
@@ -114,7 +113,7 @@ export default function PlayerEntryCard({
 
           {!hasPaid && (
             <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 text-sm">
-              ⚠ Please remember to pay your entry fee before the competition closes.
+              ⚠ Please remember to pay before the competition closes.
             </div>
           )}
 
@@ -143,7 +142,7 @@ export default function PlayerEntryCard({
       )}
 
       {message && (
-        <div className="bg-green-100 border border-green-300 rounded-lg p-3 text-center text-green-800">
+        <div className="bg-green-100 border border-green-300 rounded-lg p-3 text-center">
           ✓ {message}
         </div>
       )}
