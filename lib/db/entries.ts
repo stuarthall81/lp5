@@ -52,7 +52,9 @@ export async function submitScore(
 ) {
   const { error } = await supabase
     .from("entries")
-    .update({ score })
+    .update({
+      score,
+    })
     .eq("competition_id", competitionId)
     .eq("player_uuid", playerUuid);
 
