@@ -3,6 +3,7 @@ import PrizeFundCard from "@/components/PrizeFundCard";
 import LeaderboardCard from "@/components/LeaderboardCard";
 import CurrentPlayerEntry from "@/components/CurrentPlayerEntry";
 import { getEntries } from "@/lib/entries";
+import { getCurrentPlayer } from "@/lib/currentPlayer";
 
 type CompetitionPageProps = {
   params: Promise<{
@@ -25,13 +26,14 @@ export default async function CompetitionPage({
 
   const entries = await getEntries(competition.id);
 
-  // Temporary until authentication is added
-  const currentPlayer = "John Smith";
+  const player = await getCurrentPlayer();
 
   const playerEntry =
-    entries.find(
-      (entry) => entry.player_id === currentPlayer
-    ) ?? null;
+    player
+      ? entries.find(
+          (entry) => entry.player_id === player.id
+        ) ?? null
+      : null;
 
   return (
     <main className="min-h-screen bg-green-100 flex justify-center px-4 py-8">
@@ -53,7 +55,7 @@ export default async function CompetitionPage({
 
         <CurrentPlayerEntry
           competitionId={competition.id}
-          playerName={currentPlayer}
+          player={player}
           entry={playerEntry}
         />
 

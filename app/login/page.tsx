@@ -1,15 +1,27 @@
 "use client";
 
+import { getPlayerByMobile } from "@/lib/players";
 import { useState } from "react";
+import { savePlayerSession } from "@/lib/session";
 
 export default function LoginPage() {
   const [mobile, setMobile] = useState("");
   const [pin, setPin] = useState("");
 
-  async function login() {
-    // Authentication logic will be added next.
-    alert(`Login requested for ${mobile}`);
+ async function login() {
+  const player = await getPlayerByMobile(mobile);
+
+  if (!player) {
+    alert("Player not found");
+    return;
   }
+
+  savePlayerSession(player.id);
+
+  alert(`Welcome ${player.display_name}`);
+
+  window.location.href = "/";
+}
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-green-100">

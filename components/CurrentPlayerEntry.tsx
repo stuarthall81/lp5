@@ -2,6 +2,11 @@
 
 import PlayerEntryCard from "./PlayerEntryCard";
 
+type Player = {
+  id: string;
+  display_name: string;
+};
+
 type Entry = {
   player_id: string;
   playing: boolean;
@@ -11,15 +16,23 @@ type Entry = {
 
 type Props = {
   competitionId: string;
-  playerName: string;
+  player: Player | null;
   entry: Entry | null;
 };
 
 export default function CurrentPlayerEntry({
   competitionId,
-  playerName,
+  player,
   entry,
 }: Props) {
+  if (!player) {
+    return (
+      <p className="text-gray-600">
+        Please log in.
+      </p>
+    );
+  }
+
   if (!entry) {
     return (
       <p className="text-gray-600">
@@ -31,8 +44,8 @@ export default function CurrentPlayerEntry({
   return (
     <PlayerEntryCard
       competitionId={competitionId}
-      playerId={playerName}
-      playerName={playerName}
+      playerId={player.id}
+      playerName={player.display_name}
       playing={entry.playing}
       paid={entry.paid}
       score={entry.score ?? undefined}
