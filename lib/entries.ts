@@ -21,12 +21,17 @@ export async function updatePlayerEntry(
 ) {
   const { error } = await supabase
     .from("entries")
-    .upsert({
-      competition_id: competitionId,
-      player_id: playerId,
-      playing: updates.playing,
-      paid: updates.paid,
-    });
+    .upsert(
+  {
+    competition_id: competitionId,
+    player_id: playerId,
+    playing: updates.playing,
+    paid: updates.paid,
+  },
+  {
+    onConflict: "competition_id,player_id",
+  }
+);
 
   if (error) throw error;
 }

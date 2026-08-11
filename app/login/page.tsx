@@ -1,27 +1,55 @@
 "use client";
 
-import { getPlayerByMobile } from "@/lib/players";
 import { useState } from "react";
-import { savePlayerSession } from "@/lib/session";
+import { createClient } from "@/lib/supabase/client";
+import { getPlayerByMobile } from "@/lib/players";
 
 export default function LoginPage() {
   const [mobile, setMobile] = useState("");
   const [pin, setPin] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
- async function login() {
-  const player = await getPlayerByMobile(mobile);
+  async function login() {
+    setMessage("");
+    setLoading(true);
 
-  if (!player) {
-    alert("Player not found");
-    return;
+    try {
+      const player = await getPlayerByMobile(mobile);
+
+      if (!player) {
+        setMessage("Player not found.");
+        setLoading(false);
+        return;
+      }
+
+      if (!player.email) {
+        setMessage("This player does not have an email address.");
+        setLoading(false);
+        return;
+      }
+
+      const supabase = createClient();
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email: player.email,
+        password: pin,
+      });
+
+      if (error) {
+        console.error("Login error:", error);
+        setMessage("Login failed. Please check your mobile number and PIN.");
+        setLoading(false);
+        return;
+      }
+
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Login error:", error);
+      setMessage("Unable to log in. Please try again.");
+      setLoading(false);
+    }
   }
-
-  savePlayerSession(player.id);
-
-  alert(`Welcome ${player.display_name}`);
-
-  window.location.href = "/";
-}
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-green-100">
@@ -44,19 +72,26 @@ export default function LoginPage() {
 
         <input
           className="border rounded-lg w-full p-3 mb-6"
-          placeholder="4-digit PIN"
+          placeholder="PIN"
           type="password"
-          maxLength={4}
+          maxLength={6}
           value={pin}
           onChange={(e) => setPin(e.target.value)}
         />
 
         <button
           onClick={login}
-          className="w-full bg-green-700 text-white rounded-lg p-3 font-semibold"
+          disabled={loading}
+          className="w-full bg-green-700 text-white rounded-lg p-3 font-semibold disabled:opacity-50"
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
+
+        {message && (
+          <p className="mt-4 text-sm text-red-600">
+            {message}
+          </p>
+        )}
 
       </div>
     </main>

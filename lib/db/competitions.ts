@@ -16,7 +16,7 @@ export async function getCompetitions() {
   const { data, error } = await supabase
     .from("competitions")
     .select("*")
-    .order("date");
+    .order("competition_date");
 
   if (error) throw error;
 

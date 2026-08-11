@@ -2,16 +2,16 @@
 
 import PlayerEntryCard from "./PlayerEntryCard";
 
-type Player = {
-  id: string;
-  display_name: string;
-};
-
 type Entry = {
   player_id: string;
   playing: boolean;
   paid: boolean;
   score: number | null;
+};
+
+type Player = {
+  id: string;
+  display_name: string;
 };
 
 type Props = {
@@ -28,15 +28,7 @@ export default function CurrentPlayerEntry({
   if (!player) {
     return (
       <p className="text-gray-600">
-        Please log in.
-      </p>
-    );
-  }
-
-  if (!entry) {
-    return (
-      <p className="text-gray-600">
-        You haven't entered this competition yet.
+        Please log in to enter this competition.
       </p>
     );
   }
@@ -46,9 +38,9 @@ export default function CurrentPlayerEntry({
       competitionId={competitionId}
       playerId={player.id}
       playerName={player.display_name}
-      playing={entry.playing}
-      paid={entry.paid}
-      score={entry.score ?? undefined}
+      playing={entry?.playing ?? false}
+      paid={entry?.paid ?? false}
+      score={entry?.score ?? undefined}
     />
   );
 }

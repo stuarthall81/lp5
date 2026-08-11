@@ -1,9 +1,9 @@
-import { competitions } from "@/data/competitions";
 import PrizeFundCard from "@/components/PrizeFundCard";
 import LeaderboardCard from "@/components/LeaderboardCard";
 import CurrentPlayerEntry from "@/components/CurrentPlayerEntry";
 import { getEntries } from "@/lib/entries";
 import { getCurrentPlayer } from "@/lib/currentPlayer";
+import { getCompetition } from "@/lib/db/competitions";
 
 type CompetitionPageProps = {
   params: Promise<{
@@ -16,13 +16,23 @@ export default async function CompetitionPage({
 }: CompetitionPageProps) {
   const { id } = await params;
 
-  const competition = competitions.find(
-    (c) => c.id === id
-  );
+  const dbCompetition = await getCompetition(id);
 
-  if (!competition) {
+  if (!dbCompetition) {
     return <p>Competition not found.</p>;
   }
+
+  const competition = {
+    id: dbCompetition.id,
+    name: dbCompetition.name,
+    course: dbCompetition.course,
+    date: dbCompetition.competition_date,
+    entryFee: dbCompetition.entry_fee,
+    rollover: dbCompetition.rollover,
+    status: "OPEN" as const,
+    leaderboardRelease: "16:00",
+    entries: 0,
+  };
 
   const entries = await getEntries(competition.id);
 

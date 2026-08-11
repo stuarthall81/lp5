@@ -1,5 +1,4 @@
-import { getPlayerSession } from "./session";
-import { supabase } from "./supabase";
+import { createClient } from "@/lib/supabase/server";
 
 export type Player = {
   id: string;
@@ -11,20 +10,27 @@ export type Player = {
 };
 
 export async function getCurrentPlayer(): Promise<Player | null> {
-  const id = getPlayerSession();
+  const supabase = await createClient();
 
-  if (!id) return null;
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return null;
+  }
 
   const { data, error } = await supabase
     .from("players")
     .select(
       "id, display_name, email, mobile, golf_link_number, is_admin"
     )
-    .eq("id", id)
+    .eq("auth_user_id", user.id)
     .maybeSingle();
 
   if (error) {
-    console.error(error);
+    console.error("Current player lookup failed:", error);
     return null;
   }
 

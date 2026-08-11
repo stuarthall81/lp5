@@ -53,17 +53,15 @@ export default function PlayerEntryCard({
     window.location.reload();
   }
 
-  async function submitPlayerScore() {
-    await submitScore(
-      competitionId,
-      playerId,
-      Number(netScore)
-    );
+ async function submitPlayerScore() {
+  await submitScore(
+    competitionId,
+    playerId,
+    Number(netScore)
+  );
 
-    setMessage("Score submitted");
-
-    window.location.reload();
-  }
+  setMessage("Score submitted");
+}
 
   return (
     <div className="border rounded-xl p-4 space-y-5">
