@@ -1,13 +1,22 @@
 import PrizeFundCard from "@/components/PrizeFundCard";
 import Link from "next/link";
 import { getCurrentPlayer } from "@/lib/currentPlayer";
-import { getCompetitions } from "@/lib/db/competitions";
+import {
+  getCompetitions,
+  getPreviousCompetition,
+} from "@/lib/db/competitions";
+
 
 export default async function Home() {
   const player = await getCurrentPlayer();
 
   const competitions = await getCompetitions();
   const dbCompetition = competitions[0];
+  const previousCompetition = dbCompetition
+  ? await getPreviousCompetition(dbCompetition.competition_date)
+  : null;
+
+console.log("Previous competition:", previousCompetition);
 
   if (!dbCompetition) {
     return (

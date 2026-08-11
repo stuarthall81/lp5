@@ -22,3 +22,19 @@ export async function getCompetitions() {
 
   return data ?? [];
 }
+
+export async function getPreviousCompetition(
+  competitionDate: string
+) {
+  const { data, error } = await supabase
+    .from("competitions")
+    .select("*")
+    .lt("competition_date", competitionDate)
+    .order("competition_date", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  return data;
+}

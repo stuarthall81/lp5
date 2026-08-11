@@ -4,6 +4,8 @@ import CurrentPlayerEntry from "@/components/CurrentPlayerEntry";
 import { getEntries } from "@/lib/entries";
 import { getCurrentPlayer } from "@/lib/currentPlayer";
 import { getCompetition } from "@/lib/db/competitions";
+import { getCarryForward } from "@/lib/db/carryForward";
+
 
 type CompetitionPageProps = {
   params: Promise<{
@@ -18,9 +20,14 @@ export default async function CompetitionPage({
 
   const dbCompetition = await getCompetition(id);
 
+
   if (!dbCompetition) {
     return <p>Competition not found.</p>;
   }
+  const carryForward = await getCarryForward(
+  dbCompetition.competition_date,
+  dbCompetition.rollover ?? 0
+);
 
   const competition = {
     id: dbCompetition.id,
@@ -28,7 +35,7 @@ export default async function CompetitionPage({
     course: dbCompetition.course,
     date: dbCompetition.competition_date,
     entryFee: dbCompetition.entry_fee,
-    rollover: dbCompetition.rollover,
+    rollover: carryForward,
     status: "OPEN" as const,
     leaderboardRelease: "16:00",
     entries: 0,
@@ -50,8 +57,8 @@ export default async function CompetitionPage({
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
 
         <h1 className="text-2xl font-bold mb-2">
-          {competition.name}
-        </h1>
+  {competition.name}
+</h1>
 
         <p className="mb-2">
           📍 {competition.course}
@@ -60,7 +67,7 @@ export default async function CompetitionPage({
         <p className="mb-6">
           📅 {competition.date}
         </p>
-
+      
         <PrizeFundCard competition={competition} />
 
         <CurrentPlayerEntry
