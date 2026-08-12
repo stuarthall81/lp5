@@ -2,6 +2,7 @@ import PrizeFundCard from "@/components/PrizeFundCard";
 import Link from "next/link";
 import { getCurrentPlayer } from "@/lib/currentPlayer";
 import { getOpenCompetition } from "@/lib/db/competitions";
+import { getCarryForward } from "@/lib/db/carryForward";
 
 export default async function Home() {
   const player = await getCurrentPlayer();
@@ -24,13 +25,18 @@ export default async function Home() {
     );
   }
 
+  const carryForward = await getCarryForward(
+    dbCompetition.competition_date,
+    dbCompetition.rollover ?? 0
+  );
+
   const competition = {
     id: dbCompetition.id,
     name: dbCompetition.name,
     course: dbCompetition.course,
     date: dbCompetition.competition_date,
     entryFee: dbCompetition.entry_fee,
-    rollover: dbCompetition.rollover,
+    rollover: carryForward,
     status: dbCompetition.status as
       | "DRAFT"
       | "OPEN"
@@ -70,12 +76,10 @@ export default async function Home() {
           </p>
 
           <p>📍 {competition.course}</p>
-
           <p>📅 {competition.date}</p>
         </header>
 
         <section className="p-6">
-
           <div className="mb-6">
             <h2 className="font-semibold text-lg">
               Competition Status
@@ -104,7 +108,6 @@ export default async function Home() {
               🔒 Leaderboard goes live at 16:00
             </p>
           </div>
-
         </section>
       </div>
     </main>

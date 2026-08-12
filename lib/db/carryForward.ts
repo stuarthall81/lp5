@@ -9,17 +9,7 @@ export async function getCarryForward(
   const previousCompetition =
     await getPreviousCompetition(competitionDate);
 
-  console.log(
-    "Previous competition:",
-    previousCompetition
-  );
-
   if (!previousCompetition) {
-    console.log(
-      "No previous competition - using starting rollover:",
-      startingRollover
-    );
-
     return startingRollover;
   }
 
@@ -27,21 +17,9 @@ export async function getCarryForward(
     previousCompetition.id
   );
 
-  console.log(
-    "Previous entries:",
-    previousEntries
-  );
-
-  const carryForward = calculateCarryForward(
+  return calculateCarryForward(
     previousEntries,
     previousCompetition.entry_fee,
     previousCompetition.rollover ?? 0
   );
-
-  console.log(
-    "Calculated carry forward:",
-    carryForward
-  );
-
-  return carryForward;
 }
