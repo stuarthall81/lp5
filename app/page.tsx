@@ -1,22 +1,12 @@
 import PrizeFundCard from "@/components/PrizeFundCard";
 import Link from "next/link";
 import { getCurrentPlayer } from "@/lib/currentPlayer";
-import {
-  getCompetitions,
-  getPreviousCompetition,
-} from "@/lib/db/competitions";
-
+import { getOpenCompetition } from "@/lib/db/competitions";
 
 export default async function Home() {
   const player = await getCurrentPlayer();
 
-  const competitions = await getCompetitions();
-  const dbCompetition = competitions[0];
-  const previousCompetition = dbCompetition
-  ? await getPreviousCompetition(dbCompetition.competition_date)
-  : null;
-
-console.log("Previous competition:", previousCompetition);
+  const dbCompetition = await getOpenCompetition();
 
   if (!dbCompetition) {
     return (
@@ -41,7 +31,12 @@ console.log("Previous competition:", previousCompetition);
     date: dbCompetition.competition_date,
     entryFee: dbCompetition.entry_fee,
     rollover: dbCompetition.rollover,
-    status: "OPEN" as const,
+    status: dbCompetition.status as
+      | "DRAFT"
+      | "OPEN"
+      | "IN_PROGRESS"
+      | "LEADERBOARD"
+      | "COMPLETE",
     leaderboardRelease: "16:00",
     entries: 0,
   };
