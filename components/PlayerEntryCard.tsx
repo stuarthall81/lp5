@@ -13,6 +13,7 @@ type PlayerEntryCardProps = {
   playing: boolean;
   paid: boolean;
   score?: number;
+  entryFeeDue: number;
 };
 
 export default function PlayerEntryCard({
@@ -22,8 +23,10 @@ export default function PlayerEntryCard({
   playing,
   paid,
   score,
+  entryFeeDue,
 }: PlayerEntryCardProps) {
   const firstName = playerName.split(" ")[0];
+
   const heading = firstName.endsWith("s")
     ? `${firstName}' Entry`
     : `${firstName}'s Entry`;
@@ -43,25 +46,25 @@ export default function PlayerEntryCard({
       {
         playing: isPlaying,
         paid: hasPaid,
+        entryFeeDue,
       }
     );
 
     setEntered(true);
-
     setMessage("Competition entry saved");
 
     window.location.reload();
   }
 
- async function submitPlayerScore() {
-  await submitScore(
-    competitionId,
-    playerId,
-    Number(netScore)
-  );
+  async function submitPlayerScore() {
+    await submitScore(
+      competitionId,
+      playerId,
+      Number(netScore)
+    );
 
-  setMessage("Score submitted");
-}
+    setMessage("Score submitted");
+  }
 
   return (
     <div className="border rounded-xl p-4 space-y-5">
@@ -72,8 +75,21 @@ export default function PlayerEntryCard({
 
       {!entered ? (
         <>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex justify-between font-semibold">
+              <span>Your Entry Fee</span>
+              <span>£{entryFeeDue}</span>
+            </div>
+
+            {entryFeeDue > 5 && (
+              <p className="text-sm text-gray-600 mt-1">
+                Includes rollover catch-up from previous competitions.
+              </p>
+            )}
+          </div>
+
           <label className="flex justify-between">
-            <span>I'm Playing</span>
+            <span>I&apos;m Playing</span>
 
             <input
               type="checkbox"
@@ -85,7 +101,7 @@ export default function PlayerEntryCard({
           </label>
 
           <label className="flex justify-between">
-            <span>I've Paid</span>
+            <span>I&apos;ve Paid</span>
 
             <input
               type="checkbox"
@@ -106,7 +122,14 @@ export default function PlayerEntryCard({
       ) : (
         <>
           <div className="bg-green-50 border border-green-300 rounded-lg p-3">
-            ✅ You're entered
+            ✅ You&apos;re entered
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex justify-between font-semibold">
+              <span>Entry Fee</span>
+              <span>£{entryFeeDue}</span>
+            </div>
           </div>
 
           {!hasPaid && (
@@ -117,7 +140,7 @@ export default function PlayerEntryCard({
 
           <div>
             <label className="block mb-2 font-medium">
-              Today's Net Score
+              Today&apos;s Net Score
             </label>
 
             <input

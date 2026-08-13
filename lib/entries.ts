@@ -15,18 +15,21 @@ export async function updatePlayerEntry(
   competitionId: string,
   playerId: string,
   updates: {
-    playing: boolean;
-    paid: boolean;
-  }
+  playing: boolean;
+  paid: boolean;
+  entryFeeDue: number;
+}
+
 ) {
   const { error } = await supabase
     .from("entries")
-    .upsert(
+   .upsert(
   {
     competition_id: competitionId,
     player_id: playerId,
     playing: updates.playing,
     paid: updates.paid,
+    entry_fee_due: updates.entryFeeDue,
   },
   {
     onConflict: "competition_id,player_id",

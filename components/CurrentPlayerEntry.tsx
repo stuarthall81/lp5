@@ -7,6 +7,7 @@ type Entry = {
   playing: boolean;
   paid: boolean;
   score: number | null;
+  entry_fee_due?: number | null;
 };
 
 type Player = {
@@ -18,12 +19,14 @@ type Props = {
   competitionId: string;
   player: Player | null;
   entry: Entry | null;
+  entryFeeDue: number | null;
 };
 
 export default function CurrentPlayerEntry({
   competitionId,
   player,
   entry,
+  entryFeeDue,
 }: Props) {
   if (!player) {
     return (
@@ -41,6 +44,7 @@ export default function CurrentPlayerEntry({
       playing={entry?.playing ?? false}
       paid={entry?.paid ?? false}
       score={entry?.score ?? undefined}
+      entryFeeDue={entryFeeDue ?? 0}
     />
   );
 }
