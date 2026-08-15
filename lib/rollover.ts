@@ -1,8 +1,7 @@
-import { calculatePrizeFund } from "@/lib/prizeFund";
-
 type Entry = {
   playing: boolean;
   score: number | null;
+  entry_fee_due?: number | null;
 };
 
 export function calculateCarryForward(
@@ -18,13 +17,22 @@ export function calculateCarryForward(
     (entry) => entry.score !== null
   );
 
-  const prizeFund = calculatePrizeFund(
-    playingEntries.length,
-    entryFee,
-    currentRollover
+  const currentEntryFees = playingEntries.reduce(
+    (total, entry) => {
+      const fee =
+        entry.entry_fee_due != null
+          ? Number(entry.entry_fee_due)
+          : entryFee;
+
+      return total + fee;
+    },
+    0
   );
 
-  // No scores means there is no unique winner.
+  const prizeFund =
+    currentRollover + currentEntryFees;
+
+  // No scores = no unique winner, so everything rolls over.
   if (scoredEntries.length === 0) {
     return prizeFund;
   }
@@ -37,11 +45,11 @@ export function calculateCarryForward(
     (entry) => entry.score === lowestScore
   ).length;
 
-  // One player has the lowest score = winner.
+  // Exactly one lowest score = winner, rollover resets.
   if (lowestScoreCount === 1) {
     return 0;
   }
 
-  // Two or more players tied for lowest = rollover.
+  // Tie for lowest = entire prize fund rolls over.
   return prizeFund;
 }
