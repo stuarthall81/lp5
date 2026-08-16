@@ -22,6 +22,11 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
+      if (player.active === false) {
+       setMessage("This player account is inactive.");
+       setLoading(false);
+        return;
+      }
 
       if (!player.email) {
         setMessage("This player does not have an email address.");
