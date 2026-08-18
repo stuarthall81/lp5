@@ -1,135 +1,102 @@
 import Link from "next/link";
-import { getOpenCompetition } from "@/lib/db/competitions";
-import { getEntries } from "@/lib/entries";
-import { supabase } from "@/lib/supabase";
-import AdminEntriesTable from "@/components/AdminEntriesTable";
+import { getCompetitions } from "@/lib/db/competitions";
 
 export default async function AdminCompetitionPage() {
-  const competition = await getOpenCompetition();
+  const competitions = await getCompetitions();
 
-  if (!competition) {
-    return (
-      <main className="min-h-screen bg-green-100 flex justify-center px-4 py-8 pb-24">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
-          <h1 className="text-2xl font-bold">
-            Manage Competition
-          </h1>
-
-          <p className="mt-4">
-            No competition is currently open.
-          </p>
-
-          <Link
-            href="/admin"
-            className="block mt-6 text-green-700 font-semibold"
-          >
-            ← Back to Admin
-          </Link>
-        </div>
-      </main>
-    );
-  }
-
-  const entries = await getEntries(competition.id);
-
-  const playerIds = entries.map(
-    (entry) => entry.player_id
+  const sortedCompetitions = [...competitions].sort(
+    (a, b) =>
+      new Date(b.competition_date).getTime() -
+      new Date(a.competition_date).getTime()
   );
-
-  const { data: players, error: playersError } =
-    playerIds.length > 0
-      ? await supabase
-          .from("players")
-          .select("id, display_name")
-          .in("id", playerIds)
-      : { data: [], error: null };
-
-  if (playersError) {
-    console.error(
-      "Admin competition player lookup failed:",
-      playersError
-    );
-  }
-
-  const playerNames = new Map(
-    (players ?? []).map((player) => [
-      player.id,
-      player.display_name,
-    ])
-  );
-
-  const adminEntries = entries.map((entry) => ({
-    id: entry.id,
-    playerName:
-      playerNames.get(entry.player_id) ??
-      entry.player_id,
-    playing: entry.playing ?? false,
-    paid: entry.paid ?? false,
-    entryFeeDue: Number(
-      entry.entry_fee_due ?? 0
-    ),
-    score: entry.score,
-  }));
 
   return (
-    <main className="min-h-screen bg-green-100 flex justify-center px-4 py-8 pb-24">
-      <div className="w-full max-w-3xl space-y-6">
+    <main className="min-h-screen bg-green-100 px-4 py-8 pb-24">
+      <div className="w-full max-w-3xl mx-auto space-y-6">
 
         <div className="bg-white rounded-2xl shadow-xl p-6">
           <h1 className="text-2xl font-bold">
-            Manage Competition
+            Manage Competitions
           </h1>
 
-          <p className="mt-4 font-semibold text-lg">
-            {competition.name}
-          </p>
-
-          <p>
-            📍 {competition.course}
-          </p>
-
-          <p>
-            📅 {competition.competition_date}
-          </p>
-
-          <p className="mt-3 text-sm text-gray-600">
-            Status: {competition.status}
+          <p className="text-gray-600 mt-2">
+            Select a competition to manage entries,
+            scores and status.
           </p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-6">
           <h2 className="text-xl font-semibold mb-4">
-            Entrants
+            Competitions
           </h2>
 
-          {adminEntries.length === 0 ? (
+          {sortedCompetitions.length === 0 ? (
             <p className="text-gray-600">
-              No players entered yet.
+              No competitions found.
             </p>
           ) : (
-            <AdminEntriesTable
-              entries={adminEntries}
-            />
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2 pr-4">
+                      Competition
+                    </th>
+
+                    <th className="text-left py-2 px-2">
+                      Date
+                    </th>
+
+                    <th className="text-left py-2 px-2">
+                      Status
+                    </th>
+
+                    <th className="text-right py-2 pl-2">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {sortedCompetitions.map(
+                    (competition) => (
+                      <tr
+                        key={competition.id}
+                        className="border-b last:border-b-0"
+                      >
+                        <td className="py-3 pr-4">
+                          <p className="font-medium">
+                            {competition.name}
+                          </p>
+
+                          <p className="text-xs text-gray-500">
+                            {competition.course}
+                          </p>
+                        </td>
+
+                        <td className="py-3 px-2 whitespace-nowrap">
+                          {competition.competition_date}
+                        </td>
+
+                        <td className="py-3 px-2">
+                          {competition.status}
+                        </td>
+
+                        <td className="py-3 pl-2 text-right">
+                          <Link
+                            href={`/admin/competition/${competition.id}`}
+                            className="text-blue-700 font-semibold"
+                          >
+                            Manage
+                          </Link>
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-xl p-6">
-          <h2 className="text-xl font-semibold mb-4">
-            Competition Actions
-          </h2>
-
-          <div className="space-y-3">
-            <button
-              disabled
-              className="w-full bg-gray-200 text-gray-500 rounded-xl py-3 font-semibold"
-            >
-              Change Competition Status
-            </button>
-          </div>
-
-          <p className="text-xs text-gray-500 mt-4">
-            Competition status controls will be added next.
-          </p>
         </div>
 
         <Link
