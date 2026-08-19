@@ -1,11 +1,15 @@
 import PrizeFundCard from "@/components/PrizeFundCard";
 import LeaderboardCard from "@/components/LeaderboardCard";
 import CurrentPlayerEntry from "@/components/CurrentPlayerEntry";
+
 import { getEntries } from "@/lib/entries";
 import { getCurrentPlayer } from "@/lib/currentPlayer";
 import { getCompetition } from "@/lib/db/competitions";
 import { getCarryForward } from "@/lib/db/carryForward";
 import { calculatePlayerEntryFee } from "@/lib/playerEntryFee";
+import {
+  getEffectiveCompetitionStatus,
+} from "@/lib/competitionStatus";
 
 type CompetitionPageProps = {
   params: Promise<{
@@ -13,54 +17,80 @@ type CompetitionPageProps = {
   }>;
 };
 
+type CompetitionStatus =
+  | "DRAFT"
+  | "OPEN"
+  | "IN_PROGRESS"
+  | "LEADERBOARD"
+  | "COMPLETE";
+
 export default async function CompetitionPage({
   params,
 }: CompetitionPageProps) {
   const { id } = await params;
 
-  const dbCompetition = await getCompetition(id);
+  const dbCompetition =
+    await getCompetition(id);
 
   if (!dbCompetition) {
     return <p>Competition not found.</p>;
   }
 
-  const carryForward = await getCarryForward(
-    dbCompetition.competition_date,
-    dbCompetition.rollover ?? 0
-  );
+  const carryForward =
+    await getCarryForward(
+      dbCompetition.competition_date,
+      dbCompetition.rollover ?? 0
+    );
+
+  const effectiveStatus =
+    getEffectiveCompetitionStatus(
+      dbCompetition
+    );
+
+  /*
+   * A scheduled draft whose opening time has
+   * arrived behaves exactly like OPEN for players.
+   */
+  const competitionStatus: CompetitionStatus =
+    effectiveStatus === "OPEN_SCHEDULED"
+      ? "OPEN"
+      : (effectiveStatus as CompetitionStatus);
 
   const competition = {
     id: dbCompetition.id,
     name: dbCompetition.name,
     course: dbCompetition.course,
     date: dbCompetition.competition_date,
-    entryFee: dbCompetition.entry_fee,
+    entryFee: Number(
+      dbCompetition.entry_fee
+    ),
     rollover: carryForward,
-    status: dbCompetition.status as
-      | "DRAFT"
-      | "OPEN"
-      | "IN_PROGRESS"
-      | "LEADERBOARD"
-      | "COMPLETE",
+    status: competitionStatus,
     leaderboardRelease: "16:00",
     entries: 0,
   };
 
-  const entries = await getEntries(competition.id);
+  const entries =
+    await getEntries(competition.id);
 
-  const player = await getCurrentPlayer();
+  const player =
+    await getCurrentPlayer();
 
   const playerEntry =
     player
       ? entries.find(
-          (entry) => entry.player_id === player.id
+          (entry) =>
+            entry.player_id === player.id
         ) ?? null
       : null;
 
-  let playerEntryFee: number | null = null;
+  let playerEntryFee: number | null =
+    null;
 
   if (player) {
-    if (playerEntry?.entry_fee_due != null) {
+    if (
+      playerEntry?.entry_fee_due != null
+    ) {
       playerEntryFee = Number(
         playerEntry.entry_fee_due
       );
@@ -96,14 +126,24 @@ export default async function CompetitionPage({
           📅 {competition.date}
         </p>
 
-        <PrizeFundCard competition={competition} />
+        <PrizeFundCard
+          competition={competition}
+        />
 
-        {competition.status !== "COMPLETE" ? (
+        {competition.status !==
+        "COMPLETE" ? (
           <CurrentPlayerEntry
-            competitionId={competition.id}
+            competitionId={
+              competition.id
+            }
             player={player}
             entry={playerEntry}
-            entryFeeDue={playerEntryFee}
+            entryFeeDue={
+              playerEntryFee
+            }
+            competitionStatus={
+              competition.status
+            }
           />
         ) : (
           <div className="border rounded-xl p-4 mb-6 bg-gray-50">
@@ -112,14 +152,17 @@ export default async function CompetitionPage({
             </p>
 
             <p className="text-sm text-gray-600 mt-1">
-              This competition is now closed. Final
-              results are shown below.
+              This competition is now
+              closed. Final results are
+              shown below.
             </p>
           </div>
         )}
 
         <LeaderboardCard
-          competitionId={competition.id}
+          competitionId={
+            competition.id
+          }
         />
 
       </div>

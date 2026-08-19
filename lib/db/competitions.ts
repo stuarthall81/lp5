@@ -1,5 +1,4 @@
 import { supabase } from "../supabase";
-import { unstable_noStore as noStore } from "next/cache";
 
 export async function getCompetition(id: string) {
   const { data, error } = await supabase
@@ -25,9 +24,12 @@ export async function getCompetitions() {
 }
 
 export async function getOpenCompetition() {
-  noStore();
+  const now = new Date().toISOString();
 
-  const { data, error } = await supabase
+  const {
+    data: manualOpen,
+    error: manualOpenError,
+  } = await supabase
     .from("competitions")
     .select("*")
     .eq("status", "OPEN")
@@ -37,25 +39,99 @@ export async function getOpenCompetition() {
     .limit(1)
     .maybeSingle();
 
-  if (error) throw error;
+  if (manualOpenError) {
+    throw manualOpenError;
+  }
 
-  return data;
-}
+  if (manualOpen) {
+    return manualOpen;
+  }
 
-export async function getPreviousCompetition(
-  competitionDate: string
-) {
-  const { data, error } = await supabase
+  const {
+    data: scheduledOpen,
+    error: scheduledOpenError,
+  } = await supabase
     .from("competitions")
     .select("*")
-    .lt("competition_date", competitionDate)
-    .order("competition_date", {
-      ascending: false,
+    .eq("status", "DRAFT")
+    .not("opens_at", "is", null)
+    .lte("opens_at", now)
+    .order("opens_at", {
+      ascending: true,
     })
     .limit(1)
     .maybeSingle();
 
-  if (error) throw error;
+  if (scheduledOpenError) {
+    throw scheduledOpenError;
+  }
 
-  return data;
+  if (!scheduledOpen) {
+    return null;
+  }
+
+  return {
+    ...scheduledOpen,
+    status: "OPEN",
+  };
+}
+
+export async function getCurrentCompetition() {
+  const now = new Date().toISOString();
+
+  // First look for a competition already in its active lifecycle.
+  const {
+    data: activeCompetition,
+    error: activeError,
+  } = await supabase
+    .from("competitions")
+    .select("*")
+    .in("status", [
+      "OPEN",
+      "IN_PROGRESS",
+      "LEADERBOARD",
+    ])
+    .order("competition_date", {
+      ascending: true,
+    })
+    .limit(1)
+    .maybeSingle();
+
+  if (activeError) {
+    throw activeError;
+  }
+
+  if (activeCompetition) {
+    return activeCompetition;
+  }
+
+  // If none is explicitly active, allow a scheduled DRAFT
+  // whose opening time has arrived.
+  const {
+    data: scheduledOpen,
+    error: scheduledError,
+  } = await supabase
+    .from("competitions")
+    .select("*")
+    .eq("status", "DRAFT")
+    .not("opens_at", "is", null)
+    .lte("opens_at", now)
+    .order("opens_at", {
+      ascending: true,
+    })
+    .limit(1)
+    .maybeSingle();
+
+  if (scheduledError) {
+    throw scheduledError;
+  }
+
+  if (!scheduledOpen) {
+    return null;
+  }
+
+  return {
+    ...scheduledOpen,
+    status: "OPEN",
+  };
 }

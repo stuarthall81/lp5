@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { getCompetitions } from "@/lib/db/competitions";
+import {
+  getCompetitionStatusLabel,
+} from "@/lib/competitionStatus";
 
 export default async function AdminCompetitionPage() {
   const competitions = await getCompetitions();
@@ -79,7 +82,7 @@ export default async function AdminCompetitionPage() {
                         </td>
 
                         <td className="py-3 px-2">
-                          {competition.status}
+                          {getCompetitionStatusLabel(competition)}
                         </td>
 
                         <td className="py-3 pl-2 text-right">

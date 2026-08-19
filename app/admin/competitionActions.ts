@@ -8,6 +8,7 @@ type CreateCompetitionInput = {
   course: string;
   competitionDate: string;
   entryFee: number;
+  opensAt?: string;
 };
 
 export async function createCompetition(
@@ -28,6 +29,8 @@ export async function createCompetition(
   const competitionDate =
     input.competitionDate.trim();
   const entryFee = Number(input.entryFee);
+  const opensAt =
+    input.opensAt?.trim() || null;
 
   if (!name) {
     return {
@@ -95,14 +98,9 @@ export async function createCompetition(
       course,
       competition_date: competitionDate,
       entry_fee: entryFee,
-
-      // New competitions start with no manually
-      // entered rollover. LP5 calculates rollover
-      // dynamically from competition history.
       rollover: 0,
-
-      // New competitions start as drafts.
       status: "DRAFT",
+      opens_at: opensAt,
     });
 
   if (error) {

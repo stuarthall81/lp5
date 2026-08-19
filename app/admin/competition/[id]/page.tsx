@@ -4,6 +4,9 @@ import { getEntries } from "@/lib/entries";
 import { supabase } from "@/lib/supabase";
 import AdminEntriesTable from "@/components/AdminEntriesTable";
 import CompetitionStatusControls from "@/components/CompetitionStatusControls";
+import {
+  getCompetitionStatusLabel,
+} from "@/lib/competitionStatus";
 
 type Props = {
   params: Promise<{
@@ -103,7 +106,7 @@ export default async function AdminCompetitionDetailPage({
           </p>
 
           <p className="mt-3 text-sm text-gray-600">
-            Status: {competitionStatus}
+            Status: {getCompetitionStatusLabel(competition)}
           </p>
         </div>
 

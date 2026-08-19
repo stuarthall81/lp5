@@ -15,11 +15,19 @@ type Player = {
   display_name: string;
 };
 
+type CompetitionStatus =
+  | "DRAFT"
+  | "OPEN"
+  | "IN_PROGRESS"
+  | "LEADERBOARD"
+  | "COMPLETE";
+
 type Props = {
   competitionId: string;
   player: Player | null;
   entry: Entry | null;
   entryFeeDue: number | null;
+  competitionStatus: CompetitionStatus;
 };
 
 export default function CurrentPlayerEntry({
@@ -27,6 +35,7 @@ export default function CurrentPlayerEntry({
   player,
   entry,
   entryFeeDue,
+  competitionStatus,
 }: Props) {
   if (!player) {
     return (
@@ -45,6 +54,7 @@ export default function CurrentPlayerEntry({
       paid={entry?.paid ?? false}
       score={entry?.score ?? undefined}
       entryFeeDue={entryFeeDue ?? 0}
+      competitionStatus={competitionStatus}
     />
   );
 }

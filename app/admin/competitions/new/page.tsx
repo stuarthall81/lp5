@@ -6,31 +6,46 @@ import { createCompetition } from "@/app/admin/competitionActions";
 
 export default function NewCompetitionPage() {
   const [name, setName] = useState("");
-  const [course, setCourse] = useState("Lowes Park White");
-  const [competitionDate, setCompetitionDate] = useState("");
-  const [entryFee, setEntryFee] = useState("5");
+  const [course, setCourse] =
+    useState("Lowes Park White");
+  const [competitionDate, setCompetitionDate] =
+    useState("");
+  const [opensAt, setOpensAt] =
+    useState("");
+  const [entryFee, setEntryFee] =
+    useState("5");
 
-  const [message, setMessage] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [createdId, setCreatedId] = useState<string | null>(null);
+  const [message, setMessage] =
+    useState("");
+  const [saving, setSaving] =
+    useState(false);
+  const [createdId, setCreatedId] =
+    useState<string | null>(null);
 
   async function handleCreateCompetition() {
     setMessage("");
     setCreatedId(null);
     setSaving(true);
 
-    const result = await createCompetition({
-      name,
-      course,
-      competitionDate,
-      entryFee: Number(entryFee),
-    });
+    const result =
+      await createCompetition({
+        name,
+        course,
+        competitionDate,
+        entryFee: Number(entryFee),
+        opensAt,
+      });
 
     setMessage(result.message);
     setSaving(false);
 
-    if (result.success && result.competitionId) {
-      setCreatedId(result.competitionId);
+    if (
+      result.success &&
+      result.competitionId
+    ) {
+      setCreatedId(
+        result.competitionId
+      );
     }
   }
 
@@ -57,7 +72,9 @@ export default function NewCompetitionPage() {
           <input
             className="w-full border rounded-lg p-3 mb-5"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) =>
+              setName(e.target.value)
+            }
             placeholder="e.g. August Fiver"
           />
 
@@ -68,7 +85,9 @@ export default function NewCompetitionPage() {
           <input
             className="w-full border rounded-lg p-3 mb-5"
             value={course}
-            onChange={(e) => setCourse(e.target.value)}
+            onChange={(e) =>
+              setCourse(e.target.value)
+            }
           />
 
           <label className="block mb-2 font-medium">
@@ -79,8 +98,29 @@ export default function NewCompetitionPage() {
             type="date"
             className="w-full border rounded-lg p-3 mb-5"
             value={competitionDate}
-            onChange={(e) => setCompetitionDate(e.target.value)}
+            onChange={(e) =>
+              setCompetitionDate(
+                e.target.value
+              )
+            }
           />
+
+          <label className="block mb-2 font-medium">
+            Entries Open From
+          </label>
+
+          <input
+            type="datetime-local"
+            className="w-full border rounded-lg p-3 mb-2"
+            value={opensAt}
+            onChange={(e) =>
+              setOpensAt(e.target.value)
+            }
+          />
+
+          <p className="text-xs text-gray-500 mb-5">
+            Leave blank if you want to open entries manually.
+          </p>
 
           <label className="block mb-2 font-medium">
             Standard Entry Fee (£)
@@ -92,15 +132,21 @@ export default function NewCompetitionPage() {
             step="1"
             className="w-full border rounded-lg p-3 mb-6"
             value={entryFee}
-            onChange={(e) => setEntryFee(e.target.value)}
+            onChange={(e) =>
+              setEntryFee(e.target.value)
+            }
           />
 
           <button
-            onClick={handleCreateCompetition}
+            onClick={
+              handleCreateCompetition
+            }
             disabled={saving}
             className="w-full bg-green-700 text-white rounded-xl py-3 font-semibold disabled:opacity-50"
           >
-            {saving ? "Creating..." : "Create Competition"}
+            {saving
+              ? "Creating..."
+              : "Create Competition"}
           </button>
 
           {message && (
