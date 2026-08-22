@@ -1,4 +1,7 @@
 import { supabase } from "../supabase";
+import {
+  getEffectiveCompetitionStatus,
+} from "@/lib/competitionStatus";
 
 export async function getCompetition(id: string) {
   const { data, error } = await supabase
@@ -23,115 +26,188 @@ export async function getCompetitions() {
   return data ?? [];
 }
 
-export async function getOpenCompetition() {
-  const now = new Date().toISOString();
-
-  const {
-    data: manualOpen,
-    error: manualOpenError,
-  } = await supabase
+export async function getPreviousCompetition(
+  competitionDate: string
+) {
+  const { data, error } = await supabase
     .from("competitions")
     .select("*")
-    .eq("status", "OPEN")
+    .lt(
+      "competition_date",
+      competitionDate
+    )
     .order("competition_date", {
-      ascending: true,
+      ascending: false,
     })
     .limit(1)
     .maybeSingle();
 
-  if (manualOpenError) {
-    throw manualOpenError;
+  if (error) throw error;
+
+  return data;
+}
+
+async function previousCompetitionAllowsOpening(
+  competitionDate: string
+) {
+  const previousCompetition =
+    await getPreviousCompetition(
+      competitionDate
+    );
+
+  // First competition has nothing blocking it.
+  if (!previousCompetition) {
+    return true;
   }
 
-  if (manualOpen) {
-    return manualOpen;
+  const previousStatus =
+    getEffectiveCompetitionStatus(
+      previousCompetition
+    );
+
+  /*
+   * The next competition may open once
+   * player self-entry has closed on the
+   * previous competition.
+   */
+  return (
+    previousStatus === "LEADERBOARD" ||
+    previousStatus === "COMPLETE"
+  );
+}
+
+export async function getEntryCompetition() {
+  const competitions =
+    await getCompetitions();
+
+  /*
+   * Work through competitions chronologically.
+   * Only one competition can accept player
+   * self-entry at a time.
+   */
+  for (const competition of competitions) {
+    if (
+      competition.status === "COMPLETE"
+    ) {
+      continue;
+    }
+
+    const effectiveStatus =
+      getEffectiveCompetitionStatus(
+        competition
+      );
+
+    /*
+     * Player self-entry is allowed during
+     * OPEN and IN_PROGRESS only.
+     */
+    if (
+      effectiveStatus !== "OPEN" &&
+      effectiveStatus !== "IN_PROGRESS"
+    ) {
+      continue;
+    }
+
+    /*
+     * For a competition which is still stored
+     * as DRAFT, its automatic/scheduled opening
+     * cannot take effect until the previous
+     * competition has closed for self-entry.
+     */
+    if (competition.status === "DRAFT") {
+      const previousClosed =
+        await previousCompetitionAllowsOpening(
+          competition.competition_date
+        );
+
+      if (!previousClosed) {
+        continue;
+      }
+    }
+
+    return {
+      ...competition,
+      status: effectiveStatus,
+    };
   }
 
-  const {
-    data: scheduledOpen,
-    error: scheduledOpenError,
-  } = await supabase
-    .from("competitions")
-    .select("*")
-    .eq("status", "DRAFT")
-    .not("opens_at", "is", null)
-    .lte("opens_at", now)
-    .order("opens_at", {
-      ascending: true,
-    })
-    .limit(1)
-    .maybeSingle();
+  return null;
+}
 
-  if (scheduledOpenError) {
-    throw scheduledOpenError;
-  }
-
-  if (!scheduledOpen) {
-    return null;
-  }
-
-  return {
-    ...scheduledOpen,
-    status: "OPEN",
-  };
+export async function getOpenCompetition() {
+  /*
+   * Kept for existing parts of LP5 which still
+   * call getOpenCompetition().
+   *
+   * OPEN and IN_PROGRESS both count as the
+   * competition currently accepting entries.
+   */
+  return getEntryCompetition();
 }
 
 export async function getCurrentCompetition() {
-  const now = new Date().toISOString();
+  /*
+   * First preference is the competition
+   * currently accepting entries.
+   */
+  const entryCompetition =
+    await getEntryCompetition();
 
-  // First look for a competition already in its active lifecycle.
-  const {
-    data: activeCompetition,
-    error: activeError,
-  } = await supabase
-    .from("competitions")
-    .select("*")
-    .in("status", [
-      "OPEN",
-      "IN_PROGRESS",
-      "LEADERBOARD",
-    ])
-    .order("competition_date", {
-      ascending: true,
-    })
-    .limit(1)
-    .maybeSingle();
-
-  if (activeError) {
-    throw activeError;
+  if (entryCompetition) {
+    return entryCompetition;
   }
 
-  if (activeCompetition) {
-    return activeCompetition;
-  }
+  const competitions =
+    await getCompetitions();
 
-  // If none is explicitly active, allow a scheduled DRAFT
-  // whose opening time has arrived.
-  const {
-    data: scheduledOpen,
-    error: scheduledError,
-  } = await supabase
-    .from("competitions")
-    .select("*")
-    .eq("status", "DRAFT")
-    .not("opens_at", "is", null)
-    .lte("opens_at", now)
-    .order("opens_at", {
-      ascending: true,
-    })
-    .limit(1)
-    .maybeSingle();
+  /*
+   * If self-entry has closed, keep the
+   * LEADERBOARD competition player-facing
+   * while scores are still being submitted.
+   */
+  const leaderboardCompetitions =
+    competitions
+      .filter(
+        (competition) =>
+          competition.status !==
+          "COMPLETE"
+      )
+      .map((competition) => ({
+        ...competition,
+        effectiveStatus:
+          getEffectiveCompetitionStatus(
+            competition
+          ),
+      }))
+      .filter(
+        (competition) =>
+          competition.effectiveStatus ===
+          "LEADERBOARD"
+      )
+      .sort(
+        (a, b) =>
+          new Date(
+            b.competition_date
+          ).getTime() -
+          new Date(
+            a.competition_date
+          ).getTime()
+      );
 
-  if (scheduledError) {
-    throw scheduledError;
-  }
+  const leaderboardCompetition =
+    leaderboardCompetitions[0];
 
-  if (!scheduledOpen) {
+  if (!leaderboardCompetition) {
     return null;
   }
 
+  const {
+    effectiveStatus,
+    ...competition
+  } = leaderboardCompetition;
+
   return {
-    ...scheduledOpen,
-    status: "OPEN",
+    ...competition,
+    status: effectiveStatus,
   };
 }

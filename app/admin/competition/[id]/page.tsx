@@ -4,6 +4,7 @@ import { getEntries } from "@/lib/entries";
 import { supabase } from "@/lib/supabase";
 import AdminEntriesTable from "@/components/AdminEntriesTable";
 import CompetitionStatusControls from "@/components/CompetitionStatusControls";
+import AdminAddPlayerToCompetition from "@/components/AdminAddPlayerToCompetition";
 import {
   getCompetitionStatusLabel,
 } from "@/lib/competitionStatus";
@@ -19,7 +20,8 @@ export default async function AdminCompetitionDetailPage({
 }: Props) {
   const { id } = await params;
 
-  const competition = await getCompetition(id);
+  const competition =
+    await getCompetition(id);
 
   if (!competition) {
     return (
@@ -40,19 +42,30 @@ export default async function AdminCompetitionDetailPage({
     );
   }
 
-  const entries = await getEntries(competition.id);
+  const entries =
+    await getEntries(
+      competition.id
+    );
 
   const playerIds = entries.map(
     (entry) => entry.player_id
   );
 
-  const { data: players, error: playersError } =
+  const {
+    data: enteredPlayers,
+    error: playersError,
+  } =
     playerIds.length > 0
       ? await supabase
           .from("players")
-          .select("id, display_name")
+          .select(
+            "id, display_name"
+          )
           .in("id", playerIds)
-      : { data: [], error: null };
+      : {
+          data: [],
+          error: null,
+        };
 
   if (playersError) {
     console.error(
@@ -62,24 +75,69 @@ export default async function AdminCompetitionDetailPage({
   }
 
   const playerNames = new Map(
-    (players ?? []).map((player) => [
-      player.id,
-      player.display_name,
-    ])
+    (enteredPlayers ?? []).map(
+      (player) => [
+        player.id,
+        player.display_name,
+      ]
+    )
   );
 
-  const adminEntries = entries.map((entry) => ({
-    id: entry.id,
-    playerName:
-      playerNames.get(entry.player_id) ??
-      entry.player_id,
-    playing: entry.playing ?? false,
-    paid: entry.paid ?? false,
-    entryFeeDue: Number(
-      entry.entry_fee_due ?? 0
-    ),
-    score: entry.score,
-  }));
+  const adminEntries =
+    entries.map((entry) => ({
+      id: entry.id,
+      playerName:
+        playerNames.get(
+          entry.player_id
+        ) ?? entry.player_id,
+      playing:
+        entry.playing ?? false,
+      paid:
+        entry.paid ?? false,
+      entryFeeDue: Number(
+        entry.entry_fee_due ?? 0
+      ),
+      score: entry.score,
+    }));
+
+  /*
+   * Fetch active players so the admin
+   * can manually add someone who forgot
+   * to self-enter.
+   */
+  const {
+    data: activePlayers,
+    error: activePlayersError,
+  } = await supabase
+    .from("players")
+    .select(
+      "id, display_name"
+    )
+    .eq("active", true)
+    .order("display_name");
+
+  if (activePlayersError) {
+    console.error(
+      "Active player lookup failed:",
+      activePlayersError
+    );
+  }
+
+  const enteredPlayerIds =
+    new Set(
+      entries.map(
+        (entry) =>
+          entry.player_id
+      )
+    );
+
+  const availablePlayers =
+    (activePlayers ?? []).filter(
+      (player) =>
+        !enteredPlayerIds.has(
+          player.id
+        )
+    );
 
   const competitionStatus =
     competition.status ?? "DRAFT";
@@ -102,12 +160,40 @@ export default async function AdminCompetitionDetailPage({
           </p>
 
           <p>
-            📅 {competition.competition_date}
+            📅{" "}
+            {
+              competition.competition_date
+            }
           </p>
 
           <p className="mt-3 text-sm text-gray-600">
-            Status: {getCompetitionStatusLabel(competition)}
+            Status:{" "}
+            {getCompetitionStatusLabel(
+              competition
+            )}
           </p>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-xl p-6">
+          <h2 className="text-xl font-semibold mb-4">
+            Add Player
+          </h2>
+
+          <p className="text-sm text-gray-600 mb-4">
+            Use this if a player
+            forgot to enter themselves.
+            Their correct entry fee will
+            be calculated automatically.
+          </p>
+
+          <AdminAddPlayerToCompetition
+            competitionId={
+              competition.id
+            }
+            players={
+              availablePlayers
+            }
+          />
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-6">
@@ -115,7 +201,8 @@ export default async function AdminCompetitionDetailPage({
             Entrants
           </h2>
 
-          {adminEntries.length === 0 ? (
+          {adminEntries.length ===
+          0 ? (
             <p className="text-gray-600">
               No players entered yet.
             </p>
@@ -132,8 +219,12 @@ export default async function AdminCompetitionDetailPage({
           </h2>
 
           <CompetitionStatusControls
-            competitionId={competition.id}
-            currentStatus={competitionStatus}
+            competitionId={
+              competition.id
+            }
+            currentStatus={
+              competitionStatus
+            }
           />
         </div>
 

@@ -52,9 +52,7 @@ export default async function CompetitionPage({
    * arrived behaves exactly like OPEN for players.
    */
   const competitionStatus: CompetitionStatus =
-    effectiveStatus === "OPEN_SCHEDULED"
-      ? "OPEN"
-      : (effectiveStatus as CompetitionStatus);
+  effectiveStatus;
 
   const competition = {
     id: dbCompetition.id,

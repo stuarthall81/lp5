@@ -48,9 +48,13 @@ export default function PlayerEntryCard({
   const [entered, setEntered] = useState(playing);
   const [message, setMessage] = useState("");
 
-  const entriesOpen = competitionStatus === "OPEN";
-  const scoringOpen =
+  const entriesOpen =
+    competitionStatus === "OPEN" ||
     competitionStatus === "IN_PROGRESS";
+
+  const scoringOpen =
+    competitionStatus === "IN_PROGRESS" ||
+    competitionStatus === "LEADERBOARD";
 
   async function enterCompetition() {
     if (!entriesOpen) {
@@ -58,20 +62,25 @@ export default function PlayerEntryCard({
       return;
     }
 
-    await updatePlayerEntry(
-      competitionId,
-      playerId,
-      {
-        playing: isPlaying,
-        paid: hasPaid,
-        entryFeeDue,
-      }
-    );
+    try {
+      await updatePlayerEntry(
+        competitionId,
+        playerId,
+        {
+          playing: isPlaying,
+          paid: hasPaid,
+          entryFeeDue,
+        }
+      );
 
-    setEntered(true);
-    setMessage("Competition entry saved");
+      setEntered(true);
+      setMessage("Competition entry saved");
 
-    window.location.reload();
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+      setMessage("Unable to save competition entry.");
+    }
   }
 
   async function submitPlayerScore() {
@@ -87,18 +96,29 @@ export default function PlayerEntryCard({
       return;
     }
 
-    await submitScore(
-      competitionId,
-      playerId,
-      Number(netScore)
-    );
+    try {
+      await submitScore(
+        competitionId,
+        playerId,
+        Number(netScore)
+      );
 
-    setMessage("Score submitted");
+      setMessage("Score submitted");
+
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to submit score."
+      );
+    }
   }
 
   return (
     <div className="border rounded-xl p-4 space-y-5">
-
       <h2 className="font-semibold text-lg">
         {heading}
       </h2>
@@ -111,7 +131,8 @@ export default function PlayerEntryCard({
 
       {competitionStatus === "LEADERBOARD" && (
         <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 text-sm">
-          Competition scoring is closed. The leaderboard is now available.
+          The leaderboard is now live. Entered players can
+          still submit their scores.
         </div>
       )}
 
@@ -163,6 +184,7 @@ export default function PlayerEntryCard({
               </label>
 
               <button
+                type="button"
                 onClick={enterCompetition}
                 className="w-full bg-green-700 text-white rounded-lg py-3 font-semibold"
               >
@@ -194,7 +216,17 @@ export default function PlayerEntryCard({
             </div>
           )}
 
-          {scoringOpen ? (
+          {score !== undefined ? (
+            <div className="bg-green-50 border border-green-300 rounded-lg p-3">
+              <p className="font-semibold">
+                Score submitted: {score}
+              </p>
+
+              <p className="text-sm text-gray-600 mt-1">
+                Contact an administrator if this score needs correcting.
+              </p>
+            </div>
+          ) : scoringOpen ? (
             <>
               <div>
                 <label className="block mb-2 font-medium">
@@ -212,6 +244,7 @@ export default function PlayerEntryCard({
               </div>
 
               <button
+                type="button"
                 onClick={submitPlayerScore}
                 className="w-full bg-blue-700 text-white rounded-lg py-3 font-semibold"
               >
@@ -222,15 +255,15 @@ export default function PlayerEntryCard({
             <div className="bg-gray-50 border rounded-lg p-3 text-sm">
               Score submission will open when the competition starts.
             </div>
-          ) : competitionStatus === "LEADERBOARD" ? (
-            <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 text-sm">
-              Score submission is closed.
-            </div>
           ) : competitionStatus === "COMPLETE" ? (
             <div className="bg-gray-50 border rounded-lg p-3 text-sm">
-              Final score: {score ?? "No score submitted"}
+              No score submitted.
             </div>
-          ) : null}
+          ) : (
+            <div className="bg-gray-50 border rounded-lg p-3 text-sm">
+              Score submission is not currently available.
+            </div>
+          )}
         </>
       )}
 
@@ -239,7 +272,6 @@ export default function PlayerEntryCard({
           {message}
         </div>
       )}
-
     </div>
   );
 }

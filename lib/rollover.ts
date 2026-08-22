@@ -33,9 +33,10 @@ export function calculateCarryForward(
     currentRollover + currentEntryFees;
 
   // No scores = no unique winner, so everything rolls over.
-  if (scoredEntries.length === 0) {
-    return prizeFund;
-  }
+ if (scoredEntries.length === 0) {
+  return 0;
+}
+
 
   const lowestScore = Math.min(
     ...scoredEntries.map((entry) => entry.score!)

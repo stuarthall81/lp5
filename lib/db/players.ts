@@ -12,11 +12,11 @@ export async function getPlayerByName(name: string) {
   return data;
 }
 
-export async function getPlayer(uuid: string) {
+export async function getPlayer(id: string) {
   const { data, error } = await supabase
     .from("players")
     .select("*")
-    .eq("id", uuid)
+    .eq("id", id)
     .single();
 
   if (error) throw error;

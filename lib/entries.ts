@@ -43,15 +43,26 @@ export async function submitScore(
   playerId: string,
   score: number
 ) {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("entries")
     .update({
       score,
     })
     .eq("competition_id", competitionId)
-    .eq("player_id", playerId);
+    .eq("player_id", playerId)
+    .is("score", null)
+    .select("id")
+    .maybeSingle();
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
+
+  if (!data) {
+    throw new Error(
+      "A score has already been submitted for this competition."
+    );
+  }
 }
 
 export async function adminUpdateEntry(
